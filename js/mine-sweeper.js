@@ -32,6 +32,8 @@ function resetGame() {
     clearInterval(gTimerInterval)
     var elSpan = document.querySelector('.timer')
     elSpan.innerText = '0.000'
+    var elButton = document.querySelector('.game')
+    elButton.innerText = '🙂'
     gBoard = buildBoard()
     renderBoard(gBoard)
 }
@@ -72,16 +74,17 @@ function cellClicked(elCell, i, j, content) {
 
 
         gBoard[i][j].isShown = true
-        if (gBoard[i][j].minesAroundCount === 0) elCell.innerText = ' '
-        else elCell.innerText = content
+        if (gBoard[i][j].minesAroundCount === 0) {
+            elCell.innerText = ' '
+            expendCell(gBoard , i, j)
+        } else elCell.innerText = content
 
-        
+
+
         elCell.classList.remove('hidden')
         chekGameLost(elCell)
 
-        // if (elCell.innerText === 0) {
-        //     expendCell(gBoard , i, j)
-        // }
+
 
         if (checkGameOver()) {
             gGame.isOn = false
@@ -172,22 +175,22 @@ function chekGameLost(elCell) {
 
 
 
-function expendCell (board, rowIdx, coldIdx) {
+function expendCell(board, rowIdx, coldIdx) {
     for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
         if (i < 0 || i >= board.length) continue
         for (var j = coldIdx - 1; j <= coldIdx + 1; j++) {
             if (j < 0 || j >= board[i].length) continue
 
-            var cell = '#' + getById({i , j})
+            var cell = '#' + getById({ i, j })
             var elCell = document.querySelector(cell)
 
             gBoard[i][j].isShown = true
 
-            revealCell(elCell , gBoard[i][j])
+            revealCell(elCell, gBoard[i][j])
         }
 
     }
-    
+
 }
 
 function buildBoard() {
