@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/mine-sweeper.css">
+    <title>Document</title>
+</head>
+
+<body onload="init()">
+    <div class="page">
+
+
+
+        <h1>Mine Sweeper</h1>
+
+
+        <h2>Pick Board Size</h2>
+
+
+        <button class="board-btn" onclick="changeBoard(this)" value="16">16</button>
+        <button class="board-btn" onclick="changeBoard(this)" value="64">64</button>
+        <button class="board-btn" onclick="changeBoard(this)" value="144">144</button>
+
+        <div class="dtimer">Timer: <span class="timer">0.000</span></div>
+        <br>
+        <button class="game" onclick="resetGame(this)" onm> 🙂 </button>
+
+
+
+        <table>
+            <tbody class="board"></tbody>
+        </table>
+
+    </div>
+
+    <script src="js/mine-sweeper.js"></script>
+</body>
+
+</html>
