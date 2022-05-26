@@ -6,16 +6,11 @@
 body {
     text-align: center;
     height: 100%;
-    /* background-image: url('..img/img2.jpg') no-repeat center fixed;
-    background-size: cover; */
+
 
     background: url(../img/img2.jpg) no-repeat center fixed;
     background-size: cover;
-    /* background-image: url(../img/img2.jpg); */
-    /* background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-} */
+
 }
 
 .page {
@@ -27,12 +22,16 @@ body {
     word-spacing: 2px;
     margin: auto;
     width: 300px;
-    height: 330px;
+    height: 370px;
     -webkit-box-shadow: 0px 4px 21px 8px rgba(0, 0, 0, 0.86);
     box-shadow: 0px 4px 21px 8px rgba(0, 0, 0, 0.86);
 
 }
 
+/* img {
+    width: 120px;
+    height: auto;
+} */
 
 
 .board-btn {
@@ -41,7 +40,7 @@ body {
     border-radius: 8px;
     border-style: none;
     box-sizing: border-box;
-    color: #FFFFFF;
+    color: black;
     cursor: pointer;
     display: inline-block;
     font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -82,6 +81,11 @@ table {
     width: 60px;
     font-size: xx-large;
     cursor: pointer;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    border: none;
+    overflow: hidden;
+    outline: none;
 
 }
 
@@ -94,11 +98,14 @@ table {
 }
 
 .cell:hover {
-    background: linear-gradient(to bottom, #378de5 5%, #79bbff 100%);
-    background-color: #378de5;
+    background-color: #c26d8e;
 }
 
 .hidden {
+    background-color: rgb(148, 109, 141)
+}
+
+.hidden2 {
     background-color: rgb(148, 109, 141)
 }
 
@@ -110,13 +117,28 @@ table {
     overflow: hidden;
     outline: none;
     font-size: medium;
-    
+
 }
 
 .score-btn {
     margin-left: 50px;
     font-size: medium;
-    
+
+    background-color: transparent;
+    background-repeat: no-repeat;
+    border: none;
+    overflow: hidden;
+    outline: none;
+}
+
+.hint {
+    font-size: large;
+}
+
+.hints {
+    font-size: medium;
+    cursor: pointer;
+
     background-color: transparent;
     background-repeat: no-repeat;
     border: none;

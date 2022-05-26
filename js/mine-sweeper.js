@@ -3,6 +3,7 @@ const ET = ''
 const BOMB = '💣'
 const FLAG = '🚩'
 const LIFE = '❤️'
+const HINT = '💡'
 
 
 var markedCells
@@ -12,6 +13,7 @@ var flagsCounter
 var gHelp = 0
 var gTimerInterval
 var gBoard
+var gHintCounter
 var gLevel = {
     size: 4,
     mines: 2,
@@ -28,29 +30,34 @@ function init() {
     flagsCounter = 2
     markedCells = 2
     openCells = 0
-
+    gHintCounter = 3
     renderLives()
+    renderHints()
+    
     gBoard = buildBoard()
-
     renderBoard(gBoard)
+    
+    // safeCell(gBoard)
+    // safeClick()
 }
 
 // reset the game
 function resetGame() {
+    gHintCounter = 3
     gHelp = 0
     lifeCounter = 3
+    openCells = 0
     flagsCounter = gLevel.flags
     markedCells = gLevel.flags
-    openCells = 0
     gGame.isOn = false
 
     var elFlags = document.querySelector('.flags')
     elFlags.innerText = markedCells
-    
+
     var elScore = document.querySelector('.score')
     elScore.innerText = openCells
 
-    
+    renderHints()
     renderLives()
     clearInterval(gTimerInterval)
 
@@ -124,12 +131,15 @@ function cellClicked(elCell, i, j, content) {
             var elFlags = document.querySelector('.flags')
             elFlags.innerText = markedCells
 
-            chekGameLost(elCell)
+            if (chekGameLost(elCell)) {
+                return gHelp = 1
+            }
         }
 
         var elScore = document.querySelector('.score')
         elScore.innerText = openCells
 
+        safeCell()
 
         console.log('openCells++: ', openCells)
         if (checkGameOver()) {
@@ -143,41 +153,43 @@ function cellClicked(elCell, i, j, content) {
 
 // mark the cell with flag
 function cellMarked(ev, elCell) {
-    if (!gGame.isOn) {
-        gGame.isOn = true;
-        startTimer()
-    }
-    ev.preventDefault()
-
-
-    var pos = getCellPlace(elCell.id)
-    var currCell = gBoard[pos.i][pos.j]
-
-    if (currCell.isShown) return
-
-    var elFlags = document.querySelector('.flags')
-    
-
-    if (currCell.isMarked) {
-        currCell.isMarked = false
-        elCell.innerText = ''
-        flagsCounter++
-        markedCells++
-    } else {
-        if (flagsCounter === 0) return
-        else {
-            currCell.isMarked = true;
-            elCell.innerHTML = FLAG;
-            flagsCounter--
-            markedCells--
+    if (gHelp === 0) {
+        if (!gGame.isOn) {
+            gGame.isOn = true;
+            startTimer()
         }
-    }
-    elFlags.innerText = markedCells
+        ev.preventDefault()
 
-    if (checkGameOver()) {
-        gGame.isOn = false
-        clearInterval(gTimerInterval)
-        gHelp = 1
+
+        var pos = getCellPlace(elCell.id)
+        var currCell = gBoard[pos.i][pos.j]
+
+        if (currCell.isShown) return
+
+        var elFlags = document.querySelector('.flags')
+
+
+        if (currCell.isMarked) {
+            currCell.isMarked = false
+            elCell.innerText = ''
+            flagsCounter++
+            markedCells++
+        } else {
+            if (flagsCounter === 0) return
+            else {
+                currCell.isMarked = true;
+                elCell.innerHTML = FLAG;
+                flagsCounter--
+                markedCells--
+            }
+        }
+        elFlags.innerText = markedCells
+
+        if (checkGameOver()) {
+            gGame.isOn = false
+            clearInterval(gTimerInterval)
+            gHelp = 1
+        }
     }
 
 
@@ -189,7 +201,7 @@ function checkGameOver() {
         for (var j = 0; j < gBoard[0].length; j++) {
             var curCell = gBoard[i][j];
             if (
-                // (!curCell.isMarked && curCell.isMine) ||
+                (!curCell.isMarked && curCell.isMine) ||
                 (!curCell.isShown && !curCell.isMine)
             )
                 return false;
@@ -375,9 +387,10 @@ function getCellPlace(cellId) {
 
 // get {i , j} and return as class cell-i-j
 function getById(location) {
-    var cellClass = 'cell-' + location.i + '-' + location.j;
-    return cellClass;
+    var cellId = 'cell-' + location.i + '-' + location.j;
+    return cellId;
 }
+
 
 
 // get a domCell and modelCell => change innerText
@@ -392,13 +405,76 @@ function revealCell(elCell, location) {
     elCell.innerText = location.minesAroundCount === 0 ? ' ' : location.minesAroundCount;
 }
 
+
+function unRevealCell(location) {
+    var cellId = '#' + getById(location)
+    var elCell = document.querySelector(cellId)
+    console.log('elCell: ' , elCell)
+
+
+    elCell.classList.add('hidden');
+    elCell.innerText = ''
+}
+
+
+
 function renderLives() {
     var elLives = document.querySelector('.lives');
     var strHTML = '';
     for (var i = 0; i < lifeCounter; i++) {
         strHTML += LIFE;
-        console.log('strHTML: ', strHTML)
+        // console.log('strHTML: ', strHTML)
     }
 
     elLives.innerText = strHTML;
+}
+
+
+
+
+function renderHints () {
+    var elHints = document.querySelector('.hints')
+    var strHTML = ''
+    for(var i = 0; i < gHintCounter; i++) {
+        strHTML += HINT
+    }
+    console.log('strHTML: ' , strHTML)
+    elHints.innerText = strHTML
+}
+
+
+
+function safeClick() {
+    gHintCounter--
+    renderHints()
+
+    var cellCoord = safeCell()
+    var currCell = '#' + getById(cellCoord)
+
+    var gCell = gBoard[cellCoord.i][cellCoord.j]
+    var elCell = document.querySelector(currCell)
+
+
+    revealCell(elCell, gCell)
+
+    setTimeout(() => {
+        unRevealCell(cellCoord)
+    }, 500);
+
+
+
+
+}
+
+
+function safeCell() {
+    var safeCells = [];
+    for (var i = 0; i < gBoard.length; i++) {
+        for (var j = 0; j < gBoard[0].length; j++) {
+            //   console.log('board[i][j]: ' , board[i][j])
+            if (!gBoard[i][j].isMine) safeCells.push({ i, j });
+        }
+    }
+    //   console.log('safeCells: ' , safeCells)
+    return safeCells[rand(0, safeCells.length)];
 }
