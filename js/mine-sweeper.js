@@ -2,7 +2,12 @@
 const ET = ''
 const BOMB = '💣'
 const FLAG = '🚩'
+const LIFE = '❤️'
 
+
+var markedCells
+var openCells
+var lifeCounter
 var flagsCounter
 var gHelp = 0
 var gTimerInterval
@@ -14,30 +19,52 @@ var gLevel = {
 }
 var gGame = {
     isOn: false,
-    showCount: 0,
-    markedCount: 0,
+
 }
 
+// on load function
 function init() {
+    lifeCounter = 3
     flagsCounter = 2
+    markedCells = 2
+    openCells = 0
+
+    renderLives()
     gBoard = buildBoard()
+
     renderBoard(gBoard)
 }
 
+// reset the game
 function resetGame() {
     gHelp = 0
+    lifeCounter = 3
     flagsCounter = gLevel.flags
-    console.log('flagsCounter: ', flagsCounter)
+    markedCells = gLevel.flags
+    openCells = 0
     gGame.isOn = false
+
+    var elFlags = document.querySelector('.flags')
+    elFlags.innerText = markedCells
+    
+    var elScore = document.querySelector('.score')
+    elScore.innerText = openCells
+
+    
+    renderLives()
     clearInterval(gTimerInterval)
+
     var elSpan = document.querySelector('.timer')
     elSpan.innerText = '0.000'
+
     var elButton = document.querySelector('.game')
     elButton.innerText = '🙂'
+
     gBoard = buildBoard()
     renderBoard(gBoard)
 }
 
+// take the board from the model and put it in the dom
 function renderBoard(board) {
     var strHTML = '';
     for (var i = 0; i < board.length; i++) {
@@ -54,14 +81,13 @@ function renderBoard(board) {
         }
         strHTML += '</tr>\n';
     }
-    // console.log(strHTML);
 
     var elBoard = document.querySelector('.board');
     elBoard.innerHTML = strHTML;
 }
 
+// do and check on clicked cell
 function cellClicked(elCell, i, j, content) {
-    console.log('gLevel: ', gLevel)
     if (gHelp === 0) {
         if (!gGame.isOn) {
             gGame.isOn = true;
@@ -73,19 +99,39 @@ function cellClicked(elCell, i, j, content) {
         if (gBoard[i][j].isShown) return
 
 
+
         gBoard[i][j].isShown = true
-        if (gBoard[i][j].minesAroundCount === 0) {
-            elCell.innerText = ' '
-            expendCell(gBoard , i, j)
-        } else elCell.innerText = content
-
-
-
         elCell.classList.remove('hidden')
-        chekGameLost(elCell)
+
+        if (gBoard[i][j].minesAroundCount === 0) {
+            openCells++
+            elCell.innerText = ' '
+            expendCell(gBoard, i, j)
+        } else {
+            elCell.innerText = content
+            openCells++
+        }
 
 
+        if (elCell.innerText === BOMB) {
+            openCells--
+            lifeCounter--
+            renderLives()
 
+            gBoard[i][j].isMarked = true
+            markedCells--
+            flagsCounter--
+            var elFlags = document.querySelector('.flags')
+            elFlags.innerText = markedCells
+
+            chekGameLost(elCell)
+        }
+
+        var elScore = document.querySelector('.score')
+        elScore.innerText = openCells
+
+
+        console.log('openCells++: ', openCells)
         if (checkGameOver()) {
             gGame.isOn = false
             clearInterval(gTimerInterval)
@@ -95,6 +141,7 @@ function cellClicked(elCell, i, j, content) {
 
 }
 
+// mark the cell with flag
 function cellMarked(ev, elCell) {
     if (!gGame.isOn) {
         gGame.isOn = true;
@@ -103,41 +150,50 @@ function cellMarked(ev, elCell) {
     ev.preventDefault()
 
 
-    // console.log('elCell.id: ' , elCell.id)
     var pos = getCellPlace(elCell.id)
     var currCell = gBoard[pos.i][pos.j]
-    // console.log('currCell: ' , currCell)
 
     if (currCell.isShown) return
 
-
+    var elFlags = document.querySelector('.flags')
+    
 
     if (currCell.isMarked) {
         currCell.isMarked = false
         elCell.innerText = ''
         flagsCounter++
+        markedCells++
     } else {
         if (flagsCounter === 0) return
         else {
             currCell.isMarked = true;
             elCell.innerHTML = FLAG;
             flagsCounter--
-            console.log('gLevel.flags: ', gLevel.flags)
+            markedCells--
         }
     }
+    elFlags.innerText = markedCells
+
+    if (checkGameOver()) {
+        gGame.isOn = false
+        clearInterval(gTimerInterval)
+        gHelp = 1
+    }
+
 
 }
 
+//chek if the player finished the game and won! 
 function checkGameOver() {
     for (var i = 0; i < gBoard.length; i++) {
         for (var j = 0; j < gBoard[0].length; j++) {
             var curCell = gBoard[i][j];
             if (
-                (!curCell.isMarked && curCell.isMine) ||
+                // (!curCell.isMarked && curCell.isMine) ||
                 (!curCell.isShown && !curCell.isMine)
-            ) {
+            )
                 return false;
-            }
+
         }
     }
     var elButton = document.querySelector('.game')
@@ -145,8 +201,9 @@ function checkGameOver() {
     return true;
 }
 
+// chek if the game if the player clicked on a Bomb and reveal all the cells if the player lost
 function chekGameLost(elCell) {
-    if (elCell.innerText === BOMB) {
+    if (lifeCounter === 0) {
 
         for (var i = 0; i < gBoard.length; i++) {
             for (var j = 0; j < gBoard[0].length; j++) {
@@ -174,12 +231,13 @@ function chekGameLost(elCell) {
 }
 
 
-
+// get a cell that's innerText = ' ' and reveal the non mines negs cell's around it
 function expendCell(board, rowIdx, coldIdx) {
     for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
         if (i < 0 || i >= board.length) continue
         for (var j = coldIdx - 1; j <= coldIdx + 1; j++) {
             if (j < 0 || j >= board[i].length) continue
+            if (!board[i][j].isShown) openCells++
 
             var cell = '#' + getById({ i, j })
             var elCell = document.querySelector(cell)
@@ -193,6 +251,8 @@ function expendCell(board, rowIdx, coldIdx) {
 
 }
 
+// get a mar+trix from the creatMat function, out information in evert cell, put random mines (random mines function)
+// and update  the mines around each cell with set mine negs count function
 function buildBoard() {
     const board = createMat(gLevel.size);
 
@@ -212,6 +272,7 @@ function buildBoard() {
     return board;
 }
 
+// start second and miliseconds timer
 function startTimer() {
 
     var startTime = Date.now()
@@ -224,7 +285,7 @@ function startTimer() {
     }, 59)
 }
 
-
+// put mines in the random places by the asked size (gLevel.mines)
 function randomMines(board) {
 
     for (var i = 0; i < gLevel.mines; i++) {
@@ -233,12 +294,15 @@ function randomMines(board) {
     }
 }
 
+// gives a random number
 function rand(min, max) {
     min = Math.ceil(min)
     max = Math.floor(max)
     return Math.floor(Math.random() * (max - min) + min)
 }
 
+
+// chek if the cell is mine and if the cell isn't then the func update the cell mines negs
 function setMinesNegsCount(board) {
     for (var i = 0; i < board.length; i++) {
         for (var j = 0; j < board[i].length; j++) {
@@ -251,6 +315,7 @@ function setMinesNegsCount(board) {
 
 }
 
+// count the mines negs and return
 function getMinesAroundCounts(board, rowIdx, colIdx) {
     var negsCount = 0
     for (var i = rowIdx - 1; i <= rowIdx + 1; i++) {
@@ -267,6 +332,7 @@ function getMinesAroundCounts(board, rowIdx, colIdx) {
     return negsCount
 }
 
+// creat matrix 
 function createMat(size) {
     var mat = []
     for (var i = 0; i < size; i++) {
@@ -278,6 +344,7 @@ function createMat(size) {
     return mat
 }
 
+// change the board size, flags and mines
 function changeBoard(elInput) {
     // console.log('elInput.value: ', elInput.value)
     var newSize = elInput.value ** 0.5
@@ -296,6 +363,7 @@ function changeBoard(elInput) {
     resetGame()
 }
 
+// get cell Id (cell-i-j) and return its cord in the model {i , j}
 function getCellPlace(cellId) {
     var cell = cellId.split('-')
     var coord = {
@@ -305,18 +373,32 @@ function getCellPlace(cellId) {
     return coord
 }
 
+// get {i , j} and return as class cell-i-j
 function getById(location) {
     var cellClass = 'cell-' + location.i + '-' + location.j;
     return cellClass;
 }
 
+
+// get a domCell and modelCell => change innerText
 function revealCell(elCell, location) {
     elCell.classList.remove('hidden')
 
     if (location.isMine) {
-        elCell.innerHTML = BOMB;
+        elCell.innerText = BOMB;
         return;
     }
 
     elCell.innerText = location.minesAroundCount === 0 ? ' ' : location.minesAroundCount;
+}
+
+function renderLives() {
+    var elLives = document.querySelector('.lives');
+    var strHTML = '';
+    for (var i = 0; i < lifeCounter; i++) {
+        strHTML += LIFE;
+        console.log('strHTML: ', strHTML)
+    }
+
+    elLives.innerText = strHTML;
 }

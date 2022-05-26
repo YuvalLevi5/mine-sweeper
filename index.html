@@ -26,15 +26,25 @@
 
         <div class="dtimer">Timer: <span class="timer">0.000</span></div>
         <br>
-        <button class="game" onclick="resetGame(this)" onm> 🙂 </button>
-
-
-
-        <table>
-            <tbody class="board"></tbody>
-        </table>
+        <button class="game" onclick="resetGame(this)"> 🙂 </button>
+        <br>
+        <div class="lives"></div>
+        <div>
+            <button class="flags-btn">🚩
+                <span class="flags">2</span>
+            </button>
+            <button class="score-btn">Score:
+                <span class="score"></span>
+            </button>
+        </div>
 
     </div>
+
+
+    <table>
+        <tbody class="board"></tbody>
+    </table>
+
 
     <script src="js/mine-sweeper.js"></script>
 </body>
