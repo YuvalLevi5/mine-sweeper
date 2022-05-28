@@ -21,7 +21,6 @@ var gLevel = {
 }
 var gGame = {
     isOn: false,
-
 }
 
 // on load function
@@ -225,7 +224,7 @@ function chekGameLost(elCell) {
                 gBoard[i][j].isShown = true;
 
                 // DOM
-                var cellId = '#' + getById({ i, j });
+                var cellId = '#' + getCellId({ i, j });
                 var elCell = document.querySelector(cellId);
 
                 revealCell(elCell, gBoard[i][j]);
@@ -251,7 +250,7 @@ function expendCell(board, rowIdx, coldIdx) {
             if (j < 0 || j >= board[i].length) continue
             if (!board[i][j].isShown) openCells++
 
-            var cell = '#' + getById({ i, j })
+            var cell = '#' + getCellId({ i, j })
             var elCell = document.querySelector(cell)
 
             gBoard[i][j].isShown = true
@@ -386,7 +385,7 @@ function getCellPlace(cellId) {
 }
 
 // get {i , j} and return as class cell-i-j
-function getById(location) {
+function getCellId(location) {
     var cellId = 'cell-' + location.i + '-' + location.j;
     return cellId;
 }
@@ -407,7 +406,7 @@ function revealCell(elCell, location) {
 
 
 function unRevealCell(location) {
-    var cellId = '#' + getById(location)
+    var cellId = '#' + getCellId(location)
     var elCell = document.querySelector(cellId)
     console.log('elCell: ' , elCell)
 
@@ -438,7 +437,7 @@ function renderHints () {
     for(var i = 0; i < gHintCounter; i++) {
         strHTML += HINT
     }
-    console.log('strHTML: ' , strHTML)
+    // console.log('strHTML: ' , strHTML)
     elHints.innerText = strHTML
 }
 
@@ -449,13 +448,13 @@ function safeClick() {
     renderHints()
 
     var cellCoord = safeCell()
-    var currCell = '#' + getById(cellCoord)
+    var currCell = '#' + getCellId(cellCoord)
 
-    var gCell = gBoard[cellCoord.i][cellCoord.j]
+    var boardCell = gBoard[cellCoord.i][cellCoord.j]
     var elCell = document.querySelector(currCell)
 
 
-    revealCell(elCell, gCell)
+    revealCell(elCell, boardCell)
 
     setTimeout(() => {
         unRevealCell(cellCoord)
